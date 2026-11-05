@@ -1,0 +1,25 @@
+services:
+  kafka:
+    image: apache/kafka:3.8.0
+    ports: ["9092:9092"]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ares
+      POSTGRES_PASSWORD: ares
+      POSTGRES_DB: ares
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    volumes: [./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml]
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3000:3000"]
+
+volumes:
+  pgdata:
