@@ -2,8 +2,8 @@ import json
 
 from confluent_kafka import Consumer
 from langgraph.checkpoint.postgres import PostgresSaver
+from services.agents.resilient_agent import builder, run_task, DB_URI
 
-from resilient_agent import builder, run_task, DB_URI
 
 consumer = Consumer({
     "bootstrap.servers": "localhost:9092",
