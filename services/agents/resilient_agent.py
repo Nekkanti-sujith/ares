@@ -49,25 +49,25 @@ builder.add_edge("analyze", "draft")
 builder.add_edge("draft", "review")
 builder.add_edge("review", END)
 
+def run_task(graph, task_id: str, task: str):
+    config = {"configurable": {"thread_id": task_id}}
+    state = graph.get_state(config)
+    if state.values:
+        print(f"Resuming {task_id}, done so far: {state.values['completed_steps']}")
+        return graph.invoke(None, config, durability="sync")
+    print(f"Starting {task_id}")
+    return graph.invoke(
+        {"task": task, "completed_steps": []}, config, durability="sync"
+    )
+
 # 4. Run it
 if __name__ == "__main__":
-    
+
     task_id = sys.argv[1] if len(sys.argv) > 1 else "task-1"
-    config = {"configurable": {"thread_id": task_id}}
 
     with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
-        checkpointer.setup()  # creates checkpoint tables (safe to run every time)
+        checkpointer.setup()
         graph = builder.compile(checkpointer=checkpointer)
+        result = run_task(graph, task_id, "test task")
 
-        state = graph.get_state(config)
-        if state.values:
-            print(f"Resuming {task_id}, done so far: {state.values['completed_steps']}")
-            result = graph.invoke(None, config, durability="sync")
-        else:
-            print(f"Starting {task_id}")
-            result = graph.invoke(
-                {"task": "test task", "completed_steps": []},
-                config,
-                durability="sync",
-            )
     print("Done:", result)
